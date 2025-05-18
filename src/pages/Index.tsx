@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Mail, 
@@ -9,7 +10,10 @@ import {
   BarChart,
   Save,
   Trash2,
-  PlusCircle
+  PlusCircle,
+  LineChart,
+  Shield,
+  CheckSquare
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,6 +24,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import EmailAnalytics from "@/components/EmailAnalytics";
+import ListManagement from "@/components/ListManagement";
+import SpamScoreChecker from "@/components/SpamScoreChecker";
+import TrackingOptions, { TrackingSettings } from "@/components/TrackingOptions";
 
 // Type definitions
 interface SMTPTransport {
@@ -129,6 +137,25 @@ const Index = () => {
     complaint_url: "http://localhost:8000/webhook/complaint"
   });
 
+  // Analytics mock data
+  const [analyticsData, setAnalyticsData] = useState({
+    sentCount: 1250,
+    openCount: 875,
+    clickCount: 320,
+    bounceCount: 25,
+    complaintCount: 3
+  });
+
+  // Tracking settings
+  const [trackingSettings, setTrackingSettings] = useState<TrackingSettings>({
+    enableOpenTracking: true,
+    enableClickTracking: true,
+    trackingDomain: "track.yourdomain.com",
+    customTrackingParams: "utm_source=newsletter&utm_medium=email",
+    unsubscribeEnabled: true,
+    unsubscribeText: "If you would like to unsubscribe from these emails, click here: {{unsubscribe_link}}"
+  });
+
   const [recipientList, setRecipientList] = useState<string>("");
   const [templateContent, setTemplateContent] = useState<string>("");
   const [showPlaceholders, setShowPlaceholders] = useState<boolean>(false);
@@ -209,7 +236,8 @@ const Index = () => {
       throttle: throttleSettings,
       email_settings: emailSettings,
       ssh_settings: sshSettings,
-      webhook_settings: webhookSettings
+      webhook_settings: webhookSettings,
+      tracking_settings: trackingSettings
     };
     console.log("Saving config:", config);
     toast.success("Configuration saved successfully!");
@@ -223,6 +251,10 @@ const Index = () => {
   const insertPlaceholder = (placeholder: string) => {
     const updatedContent = templateContent + `{{${placeholder}}}`;
     setTemplateContent(updatedContent);
+  };
+
+  const handleTrackingChange = (settings: TrackingSettings) => {
+    setTrackingSettings(settings);
   };
 
   return (
@@ -246,6 +278,18 @@ const Index = () => {
           onClick={() => setActiveSection("templates")}
         >
           <FileText className="h-6 w-6" />
+        </button>
+        <button
+          className={`p-3 rounded-lg mb-4 ${activeSection === "quality" ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-100"}`}
+          onClick={() => setActiveSection("quality")}
+        >
+          <CheckSquare className="h-6 w-6" />
+        </button>
+        <button
+          className={`p-3 rounded-lg mb-4 ${activeSection === "tracking" ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-100"}`}
+          onClick={() => setActiveSection("tracking")}
+        >
+          <LineChart className="h-6 w-6" />
         </button>
         <button
           className={`p-3 rounded-lg mb-4 ${activeSection === "settings" ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-100"}`}
@@ -296,6 +340,16 @@ const Index = () => {
                 </CardContent>
               </Card>
             </div>
+            
+            <div className="mt-8">
+              <EmailAnalytics 
+                sentCount={analyticsData.sentCount}
+                openCount={analyticsData.openCount}
+                clickCount={analyticsData.clickCount}
+                bounceCount={analyticsData.bounceCount}
+                complaintCount={analyticsData.complaintCount}
+              />
+            </div>
           </div>
         )}
 
@@ -323,6 +377,11 @@ const Index = () => {
                 </div>
               </CardContent>
             </Card>
+            
+            <ListManagement 
+              recipientList={recipientList}
+              setRecipientList={setRecipientList}
+            />
           </div>
         )}
 
@@ -388,6 +447,25 @@ const Index = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        )}
+        
+        {/* Quality Check */}
+        {activeSection === "quality" && (
+          <div>
+            <h1 className="text-2xl font-bold mb-6">Email Quality</h1>
+            <SpamScoreChecker 
+              templateContent={templateContent}
+              emailSubject={emailSettings.subject}
+            />
+          </div>
+        )}
+        
+        {/* Tracking */}
+        {activeSection === "tracking" && (
+          <div>
+            <h1 className="text-2xl font-bold mb-6">Engagement Tracking</h1>
+            <TrackingOptions onTrackingChange={handleTrackingChange} />
           </div>
         )}
 
@@ -800,6 +878,15 @@ if __name__ == "__main__":
                       <h3 className="font-semibold mb-1">Subject:</h3>
                       <p className="text-sm">{emailSettings.subject}</p>
                     </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">Tracking:</h3>
+                      <p className="text-sm">
+                        {trackingSettings.enableOpenTracking ? "Opens, " : ""}
+                        {trackingSettings.enableClickTracking ? "Clicks, " : ""}
+                        {trackingSettings.unsubscribeEnabled ? "Unsubscribes" : ""}
+                        {!trackingSettings.enableOpenTracking && !trackingSettings.enableClickTracking && !trackingSettings.unsubscribeEnabled && "None"}
+                      </p>
+                    </div>
                   </div>
 
                   <div>
@@ -814,11 +901,15 @@ if __name__ == "__main__":
                   </div>
 
                   <div className="pt-4">
-                    <Button onClick={handleStartCampaign} disabled={
-                      !smtpTransports.some(t => t.host) || 
-                      !recipientList.trim() || 
-                      !templateContent.trim()
-                    }>
+                    <Button 
+                      onClick={handleStartCampaign} 
+                      disabled={
+                        !smtpTransports.some(t => t.host) || 
+                        !recipientList.trim() || 
+                        !templateContent.trim()
+                      }
+                      className="bg-green-600 hover:bg-green-700"
+                    >
                       <SendHorizontal className="h-4 w-4 mr-2" />
                       Start Campaign
                     </Button>
