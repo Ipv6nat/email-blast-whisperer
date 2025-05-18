@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Mail, 
@@ -8,7 +7,9 @@ import {
   List, 
   FileText,
   BarChart,
-  Save
+  Save,
+  Trash2,
+  PlusCircle
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -451,13 +452,13 @@ anotheremail@example.com
   <title>Email Template</title>
 </head>
 <body>
-  <h1>Hello, {{ name }}!</h1>
+  <h1>Hello, {'{{name}}'}</h1>
   <p>This is your personalized content.</p>
 </body>
 </html>"
                 />
                 <div className="flex justify-between text-sm">
-                  <span>Available placeholders: {{ name }}, {{ email }}</span>
+                  <span>Available placeholders: {'{{name}}'}, {'{{email}}'}</span>
                   <Button variant="outline" size="sm">Load from file</Button>
                 </div>
               </div>
