@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Mail, 
@@ -261,6 +260,7 @@ const Index = () => {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <div className="w-16 bg-white shadow-md flex flex-col items-center py-4">
+        <div className="text-sm font-bold mb-4 text-center text-red-600 -rotate-90">RAISE HELL</div>
         <button
           className={`p-3 rounded-lg mb-4 ${activeSection === "dashboard" ? "bg-blue-100 text-blue-600" : "text-gray-500 hover:bg-gray-100"}`}
           onClick={() => setActiveSection("dashboard")}
