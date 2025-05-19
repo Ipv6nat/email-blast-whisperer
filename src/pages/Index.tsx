@@ -159,6 +159,12 @@ const Index = () => {
   const [templateContent, setTemplateContent] = useState<string>("");
   const [showPlaceholders, setShowPlaceholders] = useState<boolean>(false);
 
+  // Campaign state
+  const [isSending, setIsSending] = useState<boolean>(false);
+  const [sendProgress, setSendProgress] = useState<number>(0);
+  const [totalToSend, setTotalToSend] = useState<number>(0);
+  const [sendComplete, setSendComplete] = useState<boolean>(false);
+
   // Handlers
   const handleAddTransport = () => {
     setSmtpTransports([...smtpTransports, { host: "", port: 0, user: "", pass: "" }]);
@@ -243,7 +249,61 @@ const Index = () => {
   };
 
   const handleStartCampaign = () => {
-    toast.success("Campaign started!");
+    // Validation
+    if (!smtpTransports.some(t => t.host)) {
+      toast.error("No SMTP server configured");
+      return;
+    }
+    
+    if (!recipientList.trim()) {
+      toast.error("No recipients added");
+      return;
+    }
+    
+    if (!templateContent.trim()) {
+      toast.error("Email template is empty");
+      return;
+    }
+    
+    // Start sending process
+    setIsSending(true);
+    setSendComplete(false);
+    
+    // Parse recipients
+    const recipients = recipientList
+      .split('\n')
+      .filter(Boolean)
+      .map(line => {
+        const [email, name] = line.split(',');
+        return { email: email.trim(), name: name ? name.trim() : '' };
+      });
+    
+    setTotalToSend(recipients.length);
+    
+    // Simulate sending process
+    let sentCount = 0;
+    
+    toast.info(`Starting campaign to ${recipients.length} recipients`);
+    
+    // Simulate the sending process with a progress indicator
+    const interval = setInterval(() => {
+      sentCount += 1;
+      setSendProgress(sentCount);
+      
+      // Log progress
+      console.log(`Sent ${sentCount} of ${recipients.length}`);
+      
+      if (sentCount >= recipients.length) {
+        clearInterval(interval);
+        setIsSending(false);
+        setSendComplete(true);
+        setAnalyticsData(prev => ({
+          ...prev,
+          sentCount: prev.sentCount + recipients.length
+        }));
+        toast.success(`Campaign completed! Sent to ${recipients.length} recipients`);
+      }
+    }, 100); // Faster for demo purposes, adjust as needed
   };
 
   // Helper function to insert placeholder
@@ -926,18 +986,56 @@ if __name__ == "__main__":
                     </div>
                   </div>
 
+                  {/* Progress display */}
+                  {isSending && (
+                    <div className="pt-4">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-green-600 h-2.5 rounded-full" 
+                          style={{ width: `${(sendProgress / totalToSend) * 100}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-sm text-center mt-2">
+                        Sending: {sendProgress} of {totalToSend} emails
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Success message */}
+                  {sendComplete && (
+                    <div className="pt-4">
+                      <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded relative" role="alert">
+                        <strong className="font-bold">Success!</strong>
+                        <span className="block sm:inline"> Your campaign has been sent to {totalToSend} recipients.</span>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="pt-4">
                     <Button 
                       onClick={handleStartCampaign} 
                       disabled={
                         !smtpTransports.some(t => t.host) || 
                         !recipientList.trim() || 
-                        !templateContent.trim()
+                        !templateContent.trim() ||
+                        isSending
                       }
-                      className="bg-green-600 hover:bg-green-700"
+                      className={`${isSending ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'} w-full`}
                     >
-                      <SendHorizontal className="h-4 w-4 mr-2" />
-                      Start Campaign
+                      {isSending ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <SendHorizontal className="h-4 w-4 mr-2" />
+                          Start Campaign
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
