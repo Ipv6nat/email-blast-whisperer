@@ -53,7 +53,7 @@ const EmailAnalytics = ({
             <span className="text-sm font-medium">Bounce Rate</span>
             <span className="text-sm font-medium">{bounceRate}%</span>
           </div>
-          <Progress value={bounceRate} className="h-2" variant="destructive" />
+          <Progress value={bounceRate} className="h-2 bg-red-100" />
           <p className="text-xs text-gray-500 mt-1">{bounceCount} of {sentCount} emails bounced</p>
         </div>
         
@@ -62,7 +62,7 @@ const EmailAnalytics = ({
             <span className="text-sm font-medium">Complaint Rate</span>
             <span className="text-sm font-medium">{complaintRate}%</span>
           </div>
-          <Progress value={complaintRate} className="h-2" variant="destructive" />
+          <Progress value={complaintRate} className="h-2 bg-red-100" />
           <p className="text-xs text-gray-500 mt-1">{complaintCount} of {sentCount} emails received complaints</p>
         </div>
       </CardContent>

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Info, Copy } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/sonner";
+import { Button } from "@/components/ui/button";
 
 interface TrackingOptionsProps {
   onTrackingChange: (tracking: TrackingSettings) => void;
@@ -161,7 +162,7 @@ const TrackingOptions = ({ onTrackingChange }: TrackingOptionsProps) => {
                     />
                     <p className="text-xs text-muted-foreground mt-2 flex items-center">
                       <Info className="h-3 w-3 mr-1" />
-                      Use {{unsubscribe_link}} as a placeholder for the unsubscribe URL
+                      Use {"{{unsubscribe_link}}"} as a placeholder for the unsubscribe URL
                     </p>
                   </div>
                   
@@ -214,8 +215,7 @@ const TrackingOptions = ({ onTrackingChange }: TrackingOptionsProps) => {
                   <div>
                     <span className="text-muted-foreground">Tracked:</span> 
                     <code className="ml-2">
-                      https://{trackingSettings.trackingDomain}/click?url=https%3A%2F%2Fexample.com%2Fpage&id={{RECIPIENT_BASE64_EMAIL}}
-                      {trackingSettings.customTrackingParams ? `&${trackingSettings.customTrackingParams}` : ''}
+                      {`https://${trackingSettings.trackingDomain}/click?url=https%3A%2F%2Fexample.com%2Fpage&id={{RECIPIENT_BASE64_EMAIL}}${trackingSettings.customTrackingParams ? `&${trackingSettings.customTrackingParams}` : ''}`}
                     </code>
                   </div>
                 </div>
