@@ -20,9 +20,13 @@ const App = () => (
       </BrowserRouter>
       <Toaster />
       <Sonner />
-      <div className="fixed bottom-2 left-2 text-[10px] text-gray-400 opacity-40 font-mono">
-        <div>Ara Nkan gara</div>
-        <div>01001001 00100000 01110011 01100101 01100101 00100000 01111001 01101111 01110101</div>
+      <div className="fixed bottom-2 left-2 text-[12px] font-mono bg-black/5 p-1 rounded">
+        <div>
+          <span className="text-green-600 font-semibold">Ara</span>
+          <span className="text-gray-700"> nkan </span>
+          <span className="text-red-600 font-semibold">Gaza</span>
+        </div>
+        <div className="text-gray-500">01001001 00100000 01110011 01100101 01100101 00100000 01111001 01101111 01110101</div>
       </div>
     </TooltipProvider>
   </QueryClientProvider>
