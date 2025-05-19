@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Mail, 
@@ -265,11 +264,20 @@ const Index = () => {
     const pastedText = e.clipboardData.getData('text');
     // We don't prevent default to allow normal paste operation
     // This ensures the paste works properly
+    
+    // Store the value in a variable before the setTimeout
+    const inputValue = e.currentTarget.value;
+    
+    // Update with the new pasted content
     setTimeout(() => {
-      // Using setTimeout to ensure the paste completes before we try to update the state
-      setTemplateContent((currentContent) => {
-        return e.currentTarget.value;
-      });
+      // Get the updated value after paste operation is complete
+      const textareaElement = e.currentTarget;
+      if (textareaElement) {
+        setTemplateContent(textareaElement.value);
+      } else {
+        // Fallback if currentTarget is null
+        setTemplateContent(inputValue + pastedText);
+      }
     }, 0);
   };
 
