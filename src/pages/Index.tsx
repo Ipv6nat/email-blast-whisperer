@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Mail, 
@@ -255,6 +256,22 @@ const Index = () => {
   const handleTrackingChange = (settings: TrackingSettings) => {
     setTrackingSettings(settings);
   };
+  
+  const handleTemplateChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTemplateContent(e.target.value);
+  };
+  
+  const handleTemplatePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const pastedText = e.clipboardData.getData('text');
+    // We don't prevent default to allow normal paste operation
+    // This ensures the paste works properly
+    setTimeout(() => {
+      // Using setTimeout to ensure the paste completes before we try to update the state
+      setTemplateContent((currentContent) => {
+        return e.currentTarget.value;
+      });
+    }, 0);
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -428,7 +445,8 @@ const Index = () => {
                 </div>
                 <Textarea
                   value={templateContent}
-                  onChange={(e) => setTemplateContent(e.target.value)}
+                  onChange={handleTemplateChange}
+                  onPaste={handleTemplatePaste}
                   placeholder="<!DOCTYPE html>
 <html>
 <head>
